@@ -1,3 +1,5 @@
+set JAVA_HOME=c:\Program Files\Java\jdk-21\
+
 @rem
 @rem Copyright 2015 the original author or authors.
 @rem
@@ -52,7 +54,7 @@ echo location of your Java installation. 1>&2
 goto fail
 
 :findJavaFromJavaHome
-set JAVA_HOME=c:\Program Files\Java\jdk-17.0.2\
+set JAVA_HOME=%JAVA_HOME:"=%
 set JAVA_EXE=%JAVA_HOME%/bin/java.exe
 
 if exist "%JAVA_EXE%" goto execute
