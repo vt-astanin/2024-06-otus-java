@@ -5,23 +5,27 @@ import annotations.Before;
 import annotations.Test;
 import tests.AnyTest;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TestRunner {
+    public static final Logger logger = LoggerFactory.getLogger(TestRunner.class);
 
     public static void runTests(Class<?> testClass) {
 	Map<String, Integer> testResults = testResults();
 
 	Method[] methods = testClass.getDeclaredMethods();
-	List<Method> beforeMethods = new ArrayList<>();
-	List<Method> afterMethods = new ArrayList<>();
-	List<Method> testMethods = new ArrayList<>();
-
-	testMethods(methods, beforeMethods, afterMethods, testMethods);
+	List<Method> beforeMethods = getMethodsByAnnotation(methods, Before.class);
+	List<Method> afterMethods = getMethodsByAnnotation(methods, After.class);
+	List<Method> testMethods = getMethodsByAnnotation(methods, Test.class);
+	//testMethods(methods, beforeMethods, afterMethods, testMethods);
 
 	for (Method testMethod : testMethods) {
 	    executeTest(testClass, testMethod, beforeMethods, afterMethods, testResults);
@@ -38,6 +42,7 @@ public class TestRunner {
 	return results;
     }
 
+    @SuppressWarnings("unused")
     private static void testMethods(Method[] methods, List<Method> beforeMethods, List<Method> afterMethods, List<Method> testMethods) {
 	for (Method method : methods) {
 	    if (method.isAnnotationPresent(Before.class)) {
@@ -48,6 +53,16 @@ public class TestRunner {
 		testMethods.add(method);
 	    }
 	}
+    }
+
+    private static List<Method> getMethodsByAnnotation(Method[] methods, Class<? extends Annotation> annotationClass) {
+	List<Method> annotatedMethods = new ArrayList<>();
+	for (Method method : methods) {
+	    if (method.isAnnotationPresent(annotationClass)) {
+		annotatedMethods.add(method);
+	    }
+	}
+	return annotatedMethods;
     }
 
     private static void executeTest(Class<?> testClass, Method testMethod, List<Method> beforeMethods, List<Method> afterMethods,
@@ -61,7 +76,7 @@ public class TestRunner {
 	    testResults.put("passed", testResults.get("passed") + 1);
 	} catch (Exception e) {
 	    testResults.put("failed", testResults.get("failed") + 1);
-	    System.out.println("Test " + testMethod.getName() + " - " + e.getCause().getMessage());
+	    logger.error("Test {} - {}", testMethod.getName(), e.getCause().getMessage());
 	} finally {
 	    executeMethods(afterMethods, testInstance);
 	}
@@ -80,15 +95,15 @@ public class TestRunner {
 	    try {
 		method.invoke(instance);
 	    } catch (Exception e) {
-		System.out.println("Error  method execution: " + method.getName() + " - " + e.getMessage());
+		logger.error("Error  method execution: {} - {}", method.getName(), e.getMessage());
 	    }
 	}
     }
 
     private static void printResults(Map<String, Integer> testResults) {
-	System.out.println("Total tests: " + testResults.get("total"));
-	System.out.println("Passed: " + testResults.get("passed"));
-	System.out.println("Failed: " + testResults.get("failed"));
+	logger.info("Total tests: {}", testResults.get("total"));
+	logger.info("Passed: {}", testResults.get("passed"));
+	logger.info("Failed: {}", testResults.get("failed"));
     }
 
     public static void main(String[] args) {

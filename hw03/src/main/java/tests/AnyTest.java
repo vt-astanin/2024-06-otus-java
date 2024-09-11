@@ -3,30 +3,39 @@ package tests;
 import annotations.After;
 import annotations.Before;
 import annotations.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AnyTest {
 
+    public static final Logger logger = LoggerFactory.getLogger(AnyTest.class);
+
+    @SuppressWarnings("unused")
     public void noAnnotate() {
-        System.out.println("no annotate");
+        logger.info("no annotate");
     }
 
     @Before
+    @SuppressWarnings("unused")
     public void testBefore() {
-        System.out.println("Executing before test");
+        logger.info("Executing before test");
     }
 
     @Test
+    @SuppressWarnings("unused")
     public void testSuccess() {
-        System.out.println("Executing success test");
+        logger.info("Executing success test");
     }
 
     @Test
+    @SuppressWarnings("unused")
     public void testFailure() {
         throw new RuntimeException("Test failed!");
     }
 
     @After
+    @SuppressWarnings("unused")
     public void testAfter(){
-        System.out.println("Executing after test");
+        logger.info("Executing after test");
     }
 }
